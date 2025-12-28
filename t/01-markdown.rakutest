@@ -1,0 +1,71 @@
+use v6;
+
+use lib <. lib>;
+use Test;
+use Jupyter::Converter;  # exports from-jupyter
+use JSON::Fast;
+
+plan *;
+
+my $json = q:to/JSON/;
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": ["# Title\n", "Some text\n"]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": ["print(1+1)\n"],
+      "outputs": [],
+      "execution_count": 1
+    },
+    {
+      "cell_type": "raw",
+      "metadata": {},
+      "source": ["RAW CELL\n"]
+    }
+  ],
+  "metadata": {
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
+JSON
+
+subtest {
+    my $md = from-jupyter($json);  # default is Markdown
+
+    ok $md ~~ / '# Title' /,                 'contains markdown heading';
+    ok $md ~~ / 'Some text' /,               'contains markdown body text';
+    ok $md ~~ / '```python' /,               'uses python fenced code block';
+    ok $md ~~ / 'print(1+1)' /,              'contains code cell source';
+    ok $md ~~ / 'RAW CELL' /,                'contains raw cell text';
+}, 'Markdown conversion from JSON string';
+
+subtest {
+    my $md = from-jupyter($json, :to<Markdown>);
+    ok $md ~~ / '```python' /, ':to<Markdown> also produces fenced code';
+}, 'Markdown conversion with explicit :to<Markdown>';
+
+subtest {
+    my $md = from-jupyter($json, :to(Whatever));
+    ok $md ~~ / '```python' /, 'Whatever target falls back to Markdown';
+}, 'Markdown fallback when :to is Whatever';
+
+subtest {
+    dies-ok { from-jupyter($json, :to<'SomethingElse'>) };
+}, 'Markdown fallback for unknown :to value';
+
+subtest {
+    my %nb = from-json($json);
+    my $md = from-jupyter(%nb, :to<Markdown>);
+    ok $md ~~ / '# Title' /, 'decoded hash input works for Markdown';
+}, 'Markdown conversion from decoded hash';
+
+done-testing;

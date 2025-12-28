@@ -1,0 +1,49 @@
+use v6;
+
+use Test;
+use Jupyter::Converter;  # exports from-jupyter
+use JSON::Fast;
+
+plan *;
+
+my $json = q:to/JSON/;
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": ["# Title\n", "Some text\n"]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": ["print(1+1)\n"],
+      "outputs": [],
+      "execution_count": 1
+    }
+  ],
+  "metadata": {
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
+JSON
+
+subtest {
+    my $html = from-jupyter($json, :to<HTML>);
+
+    ok $html ~~ / '<!DOCTYPE html>' /,                'HTML has DOCTYPE';
+    ok $html ~~ / '<p>' .* 'Title' /,                 'Markdown cell becomes <p>…';
+    ok $html ~~ / '<pre><code' .* 'language-python'/, 'Code cell has language-python class';
+    ok $html ~~ / 'print(1+1)' /,                     'Code source present in HTML';
+}, 'HTML conversion from JSON string';
+
+subtest {
+    my %nb = from-json($json);
+    ok from-jupyter(%nb, :to<html>);
+}, 'HTML conversion from decoded hash';
+
+done-testing;
