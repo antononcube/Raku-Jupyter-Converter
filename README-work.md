@@ -68,14 +68,6 @@ The package provides a Command Line Interface (CLI) script, `from-jupyter`. Here
 ```shell
 from-jupyter --help
 ```
-```
-# Usage:
-#   from-jupyter <text> [-t|--format|--to=<Str>] [-o|--output=<Str>] -- Converts Jupyter notebooks into Markdown, HTML, and Pod6 files.
-#   
-#     <text>                    Input file or Markdown text.
-#     -t|--format|--to=<Str>    Format to convert to. (One of 'html', 'markdown', 'pod6', or 'Whatever'.) [default: 'Whatever']
-#     -o|--output=<Str>         Output file; if an empty string then the result is printed to stdout. [default: '']
-```
 
 The CLI script `from-jupyter` takes both file names and (Markdown) text. Here is an usage example for the latter:
 
