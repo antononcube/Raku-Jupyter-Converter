@@ -9,17 +9,18 @@ use Jupyter::Converter::POD6;
 # Internal conversion dispatcher
 #----------------------------------------------------------------------
 
-sub convert-notebook(%nb, :to(:$target) is copy = Whatever --> Str) {
+sub convert-notebook(%nb, :target(:$to) is copy = Whatever --> Str) {
 
-    if $target.isa(Whatever) { $target = 'Markdown' }
-    die 'The argument $target is expected to be a string or Whatever.'
-    unless $target ~~ Str:D;
+    if $to.isa(Whatever) { $to = 'Markdown' }
+    die 'The argument $to is expected to be a string or Whatever.'
+    unless $to ~~ Str:D;
 
 
-    my $actions = do given $target.lc {
-        when $_ eq 'markdown' { Jupyter::Converter::Markdown.new }
-        when $_ eq 'html'     { Jupyter::Converter::HTML.new }
-        when $_ ∈ <pod6 pod>  { Jupyter::Converter::POD6.new }
+    my $actions = do given $to.lc {
+        when $_ ∈ <raku perl6> { %nb }
+        when $_ eq 'markdown'  { Jupyter::Converter::Markdown.new }
+        when $_ eq 'html'      { Jupyter::Converter::HTML.new }
+        when $_ ∈ <pod6 pod>   { Jupyter::Converter::POD6.new }
         default {
             my @expected = <Markdown HTML POD6>;
             die "Unknown target spec. Target specification is expected to be one of: \"{@expected.join('", "')}\"."
@@ -33,11 +34,16 @@ sub convert-notebook(%nb, :to(:$target) is copy = Whatever --> Str) {
 # Public API: single exported sub
 #----------------------------------------------------------------------
 
-sub from-jupyter($notebook, :to(:$target) is copy = Whatever --> Str) is export {
+sub from-jupyter($notebook, :target(:$to) is copy = Whatever --> Str) is export {
 
-    if $target.isa(Whatever) { $target = 'Markdown' }
-    die 'The argument $target is expected to be a string or Whatever.'
-    unless $target ~~ Str:D;
+    if $notebook.IO.f {
+        my $text = slurp($notebook);
+        return from-jupyter($text, :$to);
+    }
+    
+    if $to.isa(Whatever) { $to = 'Markdown' }
+    die 'The argument $to is expected to be a string or Whatever.'
+    unless $to ~~ Str:D;
 
     my $nb;
     given $notebook {
@@ -57,5 +63,5 @@ sub from-jupyter($notebook, :to(:$target) is copy = Whatever --> Str) is export 
         }
     }
 
-    return convert-notebook($nb, :$target);
+    return convert-notebook($nb, :$to);
 }
