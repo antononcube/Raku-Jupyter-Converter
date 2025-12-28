@@ -9,7 +9,7 @@ my %*SUB-MAIN-OPTS = :named-anywhere;
 
 #| Converts Jupyter notebooks into Markdown, HTML, and Pod6 files.
 sub MAIN(Str $text,                                  #= Input file or Markdown text.
-         Str :t(:target(:$to)) = 'Whatever',         #= Format to convert to. (One of 'html', 'markdown', 'pod6', or 'Whatever'.)
+         Str :t(:format(:$to)) = 'Whatever',         #= Format to convert to. (One of 'html', 'markdown', 'pod6', or 'Whatever'.)
          Str :o(:$output) = '',                      #= Output file; if an empty string then the result is printed to stdout.
          ) {
 
