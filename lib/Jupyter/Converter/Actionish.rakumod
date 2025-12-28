@@ -43,8 +43,8 @@ role Jupyter::Converter::Actionish {
 }
 
 class X::Jupyter::Converter::DecodeError is Exception {
-    has Str $.json;
-    has Str $.message;
+    has Str:D $.json;
+    has Str:D $.message;
 
     method message() {
         "Failed to decode Jupyter notebook JSON: $.message"
@@ -52,6 +52,6 @@ class X::Jupyter::Converter::DecodeError is Exception {
 }
 
 class X::Jupyter::Converter::StructureError is Exception {
-    has Str $.message;
+    has Str:D $.message;
     method message() { "Invalid Jupyter notebook structure: $.message" }
 }
