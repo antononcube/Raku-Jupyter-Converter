@@ -14,27 +14,44 @@ sub convert-notebook(%nb,
                      :target(:$to) is copy = Whatever,
                      :$image-dirname = Whatever,
                      :$notebook-dirname = Whatever,
+                     :$method = Whatever
         --> Str) {
 
     if $to.isa(Whatever) { $to = 'Markdown' }
     die 'The argument $to is expected to be a string or Whatever.'
     unless $to ~~ Str:D;
 
+    my Bool:D $delegate = $method ~~ Str:D && $method.lc ∈ <delegate delegation via-markdown>;
+
     my $actions = do given $to.lc {
-        when $_ ∈ <raku perl6>   { %nb }
-        when $_ eq 'markdown'    { Jupyter::Converter::Markdown.new(:$image-dirname, :$notebook-dirname) }
-        when $_ eq 'html'        { Jupyter::Converter::HTML.new }
-        when $_ ∈ <pod6 pod>     { Jupyter::Converter::POD6.new }
+        when $_ ∈ <raku perl6> { %nb }
+
+        when $_ eq 'markdown' { Jupyter::Converter::Markdown.new(:$image-dirname, :$notebook-dirname) }
+
+        when $_ eq 'html' && $delegate {
+            my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
+            return from-markdown($md, to => 'html')
+        }
+        when $_ eq 'html' { Jupyter::Converter::HTML.new }
+
+        when $_ ∈ <pod6 pod> && $delegate {
+            my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
+            return from-markdown($md, to => 'pod6')
+        }
+        when $_ ∈ <pod6 pod> { Jupyter::Converter::POD6.new }
+
         when $_ ∈ <org org-mode> {
             my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
             return from-markdown($md, to => 'org-mode')
         }
+
         when $_ ∈ <wolfram wl mathematica> {
             my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
             return from-markdown($md, to => 'mathematica')
         }
+
         default {
-            my @expected = <Markdown HTML POD6>;
+            my @expected = <Markdown Mathematica HTML POD6 Org-mode>;
             die "Unknown target spec. Target specification is expected to be one of: \"{@expected.join('", "')}\"."
         }
     }
@@ -50,6 +67,7 @@ sub from-jupyter($notebook,
                  :target(:$to) is copy = Whatever,
                  :image-directory(:$image-dirname) is copy = Whatever,
                  :notebook-directory(:$notebook-dirname) is copy = Whatever,
+                 :$method = Whatever
         --> Str) is export {
 
     if $notebook.IO.f {
@@ -71,6 +89,9 @@ sub from-jupyter($notebook,
     die 'The argument $to is expected to be a string or Whatever.'
     unless $to ~~ Str:D;
 
+    die 'The argument $method is expected to be a string or Whatever.'
+    unless $method ~~ Str:D || $method.isa(Whatever);
+
     my $nb;
     given $notebook {
         when $_ ~~ Associative:D { $nb = $_ }
@@ -89,5 +110,5 @@ sub from-jupyter($notebook,
         }
     }
 
-    return convert-notebook($nb, :$to, :$image-dirname, :$notebook-dirname);
+    return convert-notebook($nb, :$to, :$image-dirname, :$notebook-dirname, :$method);
 }

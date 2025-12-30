@@ -11,6 +11,7 @@ my %*SUB-MAIN-OPTS = :named-anywhere;
 sub MAIN(Str $text,                                    #= Input file or Markdown text.
          Str :t(:format(:$to)) = 'Whatever',           #= Format to convert to. (One of 'html', 'markdown', 'pod6', or 'Whatever'.)
          Str :img-dir(:$image-directory) = 'Whatever', #= Directory to export images to.
+         Str :m(:$method) = 'Whatever',                #= Method of conversion. (One of 'delegation' or 'Whatever'.)
          Str :o(:$output) = '',                        #= Output file; if an empty string then the result is printed to stdout.
          ) {
 
@@ -30,7 +31,8 @@ sub MAIN(Str $text,                                    #= Input file or Markdown
         }
     }
 
-    my $res = from-jupyter($text, target => $toSpec, :$image-directory);
+    my $m = $method.lc ∈ <whatever auto automatic> ?? Whatever !! $method;
+    my $res = from-jupyter($text, target => $toSpec, :$image-directory, method => $m);
 
     if $output.chars > 0 {
         spurt($output, $res);
