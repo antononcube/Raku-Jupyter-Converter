@@ -4,6 +4,7 @@ use JSON::Fast;
 use Jupyter::Converter::Markdown;
 use Jupyter::Converter::HTML;
 use Jupyter::Converter::POD6;
+use Markdown::Grammar;
 
 #----------------------------------------------------------------------
 # Internal conversion dispatcher
@@ -20,10 +21,18 @@ sub convert-notebook(%nb,
     unless $to ~~ Str:D;
 
     my $actions = do given $to.lc {
-        when $_ ∈ <raku perl6> { %nb }
-        when $_ eq 'markdown'  { Jupyter::Converter::Markdown.new(:$image-dirname, :$notebook-dirname) }
-        when $_ eq 'html'      { Jupyter::Converter::HTML.new }
-        when $_ ∈ <pod6 pod>   { Jupyter::Converter::POD6.new }
+        when $_ ∈ <raku perl6>   { %nb }
+        when $_ eq 'markdown'    { Jupyter::Converter::Markdown.new(:$image-dirname, :$notebook-dirname) }
+        when $_ eq 'html'        { Jupyter::Converter::HTML.new }
+        when $_ ∈ <pod6 pod>     { Jupyter::Converter::POD6.new }
+        when $_ ∈ <org org-mode> {
+            my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
+            return from-markdown($md, to => 'org-mode')
+        }
+        when $_ ∈ <wolfram wl mathematica> {
+            my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
+            return from-markdown($md, to => 'mathematica')
+        }
         default {
             my @expected = <Markdown HTML POD6>;
             die "Unknown target spec. Target specification is expected to be one of: \"{@expected.join('", "')}\"."
@@ -39,8 +48,8 @@ sub convert-notebook(%nb,
 
 sub from-jupyter($notebook,
                  :target(:$to) is copy = Whatever,
-                 :$image-dirname is copy = Whatever,
-                 :$notebook-dirname is copy = Whatever,
+                 :image-directory(:$image-dirname) is copy = Whatever,
+                 :notebook-directory(:$notebook-dirname) is copy = Whatever,
         --> Str) is export {
 
     if $notebook.IO.f {
