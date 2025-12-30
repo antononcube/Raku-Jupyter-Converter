@@ -11,17 +11,18 @@ use Jupyter::Converter::POD6;
 
 sub convert-notebook(%nb,
                      :target(:$to) is copy = Whatever,
-                     :$image-directory = Whatever
+                     :$image-dirname = Whatever,
+                     :$notebook-dirname = Whatever,
         --> Str) {
 
     if $to.isa(Whatever) { $to = 'Markdown' }
     die 'The argument $to is expected to be a string or Whatever.'
     unless $to ~~ Str:D;
 
-
+    say (:$image-dirname, :$notebook-dirname);
     my $actions = do given $to.lc {
         when $_ ∈ <raku perl6> { %nb }
-        when $_ eq 'markdown'  { Jupyter::Converter::Markdown.new(:$image-directory) }
+        when $_ eq 'markdown'  { Jupyter::Converter::Markdown.new(:$image-dirname, :$notebook-dirname) }
         when $_ eq 'html'      { Jupyter::Converter::HTML.new }
         when $_ ∈ <pod6 pod>   { Jupyter::Converter::POD6.new }
         default {
@@ -39,19 +40,23 @@ sub convert-notebook(%nb,
 
 sub from-jupyter($notebook,
                  :target(:$to) is copy = Whatever,
-                 :$image-directory is copy = Whatever
+                 :$image-dirname is copy = Whatever,
+                 :$notebook-dirname is copy = Whatever,
         --> Str) is export {
 
     if $notebook.IO.f {
+        if $image-dirname.isa(Whatever) { $image-dirname = $notebook.IO.dirname.Str ~ '/img' }
+        $notebook-dirname = $notebook.IO.dirname.Str;
         my $text = slurp($notebook);
-        return from-jupyter($text, :$to);
+        return from-jupyter($text, :$to, :$image-dirname, :$notebook-dirname);
     }
 
-    if $image-directory.isa(Whatever) { $image-directory = $notebook.IO.dirname ~ '/img'}
-    if $image-directory.IO.e && !$image-directory.IO.d {
-        die "Cannot use '$image-directory' as directory."
-    } elsif !$image-directory.IO.d {
-        $image-directory.IO.mkdir
+    if $image-dirname.isa(Whatever) { $image-dirname = $*CWD ~ '/img' }
+    if $notebook-dirname.isa(Whatever) { $notebook-dirname = $*CWD }
+    if $image-dirname.IO.e && !$image-dirname.IO.d {
+        die "Cannot use '$image-dirname' as directory."
+    } elsif !$image-dirname.IO.d {
+        $image-dirname.IO.mkdir
     }
     
     if $to.isa(Whatever) { $to = 'Markdown' }
@@ -76,5 +81,5 @@ sub from-jupyter($notebook,
         }
     }
 
-    return convert-notebook($nb, :$to, :$image-directory);
+    return convert-notebook($nb, :$to, :$image-dirname, :$notebook-dirname);
 }
