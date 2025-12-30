@@ -6,10 +6,9 @@ Jupyter converters of Jupyter files into files of different kind of formats:
 
 - [X] DONE HTML file
 - [X] DONE Markdown file
-- [ ] DONE Mathematica notebook
-- [ ] DONE Org-mode file
+- [ ] TODO Mathematica notebook
+- [ ] TODO Org-mode file
 - [X] DONE Pod6 file
-- [ ] TODO RMarkdown notebook
 - [X] DONE Raku data structure
 
 ### Related work
@@ -82,6 +81,8 @@ then an attempt is made to conclude the format to convert to from the extension 
 
 The most important items are placed first.
 
+- [X] DONE Markdown: export SVG images into an image directory
+  - And use the links to those images in the Markdown output.
 - [ ] TODO Delegate to "Grammar::Markdown" for conversion
   - [ ] TODO Have a method option in `from-jupyter`
   - [ ] TODO Corresponding CLI changes

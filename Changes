@@ -1,0 +1,10 @@
+Changes of the Raku package "Jupyter::Converter".
+
+2025-12-30 0.0.2
+    - Implemented the Markdown converter to export SVG images into a directory
+        - The Markdown output uses the links to those images
+        - Multiple SVG images in a Jupyter output cell are handled.
+            - E.g. tables of SVGs.
+
+2025-12-28 0.0.1
+    - First version; converters to HTML, Markdown, Pod6, Raku.
