@@ -76,5 +76,5 @@ sub from-jupyter($notebook,
         }
     }
 
-    return convert-notebook($nb, :$to);
+    return convert-notebook($nb, :$to, :$image-directory);
 }
