@@ -19,7 +19,6 @@ sub convert-notebook(%nb,
     die 'The argument $to is expected to be a string or Whatever.'
     unless $to ~~ Str:D;
 
-    say (:$image-dirname, :$notebook-dirname);
     my $actions = do given $to.lc {
         when $_ ∈ <raku perl6> { %nb }
         when $_ eq 'markdown'  { Jupyter::Converter::Markdown.new(:$image-dirname, :$notebook-dirname) }
