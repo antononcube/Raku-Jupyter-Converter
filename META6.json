@@ -1,7 +1,7 @@
 {
     "name": "Jupyter::Converter",
     "description": "Converters of Jupyter notebooks into different formats (HTML, Markdown, Pod6.)",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "raku": "6.d",
     "authors": [
         "Anton Antonov"
