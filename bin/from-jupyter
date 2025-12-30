@@ -15,6 +15,7 @@ sub MAIN(Str $text,                                    #= Input file or Markdown
          Str :o(:$output) = '',                        #= Output file; if an empty string then the result is printed to stdout.
          ) {
 
+    # Process converter type
     my $toSpec = $to;
     if !$to || $to.lc ∈ <whatever automatic> {
         $toSpec = do given $output {
@@ -31,9 +32,14 @@ sub MAIN(Str $text,                                    #= Input file or Markdown
         }
     }
 
+    # Process the other options
+    my $img-dir = $image-directory.lc ∈ <whatever auto automatic> ?? Whatever !! $image-directory;
     my $m = $method.lc ∈ <whatever auto automatic> ?? Whatever !! $method;
-    my $res = from-jupyter($text, target => $toSpec, :$image-directory, method => $m);
 
+    # Main call
+    my $res = from-jupyter($text, target => $toSpec, image-directory => $img-dir, method => $m);
+
+    # Write to file or print
     if $output.chars > 0 {
         spurt($output, $res);
     } else {
