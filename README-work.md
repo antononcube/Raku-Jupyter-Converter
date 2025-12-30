@@ -6,8 +6,8 @@ Jupyter converters of Jupyter files into files of different kind of formats:
 
 - [X] DONE HTML file
 - [X] DONE Markdown file
-- [ ] TODO Mathematica notebook
-- [ ] TODO Org-mode file
+- [X] DONE Mathematica notebook
+- [X] DONE Org-mode file
 - [X] DONE Pod6 file
 - [X] DONE Raku data structure
 
@@ -110,7 +110,7 @@ The most important items are placed first.
 ### Packages
 
 [AAp1] Anton Antonov
-[Markdown::Grammar Raku package](https://github.com/antononcube/Raku-Markdown-Grammar),
+[Markdown::Grammar, Raku package](https://github.com/antononcube/Raku-Markdown-Grammar),
 (2022-2025),
 [GitHub/antononcube](https://github.com/antononcube).
 
