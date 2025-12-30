@@ -40,8 +40,8 @@ class Jupyter::Converter::Markdown
         my $footer = "```";
         my @chunks = "$header\n$body\n$footer";
 
-        my $svg-links = self!render-svg-outputs(%cell<outputs> // [], :$idx);
-        @chunks.push($svg-links) if $svg-links.chars;
+        my $rendered-outputs = self!render-outputs(%cell<outputs> // [], :$idx);
+        @chunks.push($rendered-outputs) if $rendered-outputs.chars;
 
         @chunks.join("\n\n");
     }
@@ -52,25 +52,26 @@ class Jupyter::Converter::Markdown
         "```unknown-cell-$type\n$body\n```";
     }
 
-    method !render-svg-outputs(@outputs, :$idx! --> Str) {
-        my @links;
+    method !render-outputs(@outputs, :$idx! --> Str) {
+        my @chunks;
 
         for @outputs.kv -> $output-idx, %output {
-            my $data    = %output<data> // next;
-            my $raw-svg = $data{'image/svg+xml'}
-                       // self!extract-svg-from-html($data{'text/html'})
-                       // next;
+            my $data = %output<data> // next;
 
-            my $svg = self!normalize-svg($raw-svg) // next;
-
-            my $path = self!write-svg($svg, :cell-idx($idx), :$output-idx);
-            if $!notebook-dirname.defined && $!notebook-dirname.Str eq $path.IO.dirname.Str {
-                $path .= subst($!notebook-dirname, '.')
+            if $data{'text/html'} -> $raw-html {
+                my $html = self!render-html-output($raw-html, :cell-idx($idx), :$output-idx);
+                @chunks.push($html) if $html.chars;
             }
-            @links.push("![cell {$idx + 1} output {$output-idx + 1} svg]($path)");
+
+            if $data{'image/svg+xml'} -> $raw-svg {
+                my $svg = self!normalize-svg($raw-svg) // next;
+
+                my $path = self!write-svg($svg, :cell-idx($idx), :$output-idx);
+                @chunks.push("![cell {$idx + 1} output {$output-idx + 1} svg]($path)");
+            }
         }
 
-        @links.join("\n\n");
+        @chunks.join("\n\n");
     }
 
     method !normalize-svg($raw) {
@@ -81,29 +82,45 @@ class Jupyter::Converter::Markdown
         }
     }
 
-    method !extract-svg-from-html($raw-html) {
+    method !render-html-output($raw-html, :$cell-idx!, :$output-idx! --> Str) {
         my $html = do given $raw-html {
             when Str        { $_ }
             when Positional { .join("") }
             default         { return Nil }
         }
 
-        return Nil unless $html ~~ /:i '<svg'/;
+        my $svg-idx = 0;
+        my $cell-num   = $cell-idx   + 1;
+        my $output-num = $output-idx + 1;
 
-        if $html ~~ /:s ( '<svg' .*? '</svg>' ) / {
-            return ~$0;
-        }
-        return $html;
+        $html = $html.subst(
+            /:s '<svg' .*? '</svg>' /,
+            {
+                my $svg = ~$/;
+                my $path = self!write-svg($svg, :$cell-idx, :$output-idx, :svg-idx($svg-idx));
+                $svg-idx++;
+                qq{<img src="$path" alt="cell $cell-num output $output-num svg $svg-idx">};
+            },
+            :g
+        ) if $html ~~ /:i '<svg'/;
+
+        $html;
     }
 
-    method !write-svg(Str $svg, :$cell-idx!, :$output-idx! --> Str) {
+    method !write-svg(Str $svg, :$cell-idx!, :$output-idx!, :$svg-idx = 0 --> Str) {
         my $dir = self!ensure-image-directory;
 
-        my $file = "cell-{$cell-idx + 1}-output-{$output-idx + 1}.svg";
+        my $file = "cell-{$cell-idx + 1}-output-{$output-idx + 1}";
+        $file ~= "-{$svg-idx + 1}" if $svg-idx > 0;
+        $file ~= ".svg";
 
         my $path = $dir.add($file);
         spurt($path, $svg);
-        $path.Str;
+        my $path-str = $path.Str;
+        if $!notebook-dirname.defined && $!notebook-dirname.Str eq $path.IO.dirname.Str {
+            $path-str .= subst($!notebook-dirname.Str, '.');
+        }
+        $path-str;
     }
 
     method !ensure-image-directory() {
