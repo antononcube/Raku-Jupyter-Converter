@@ -9,7 +9,10 @@ use Jupyter::Converter::POD6;
 # Internal conversion dispatcher
 #----------------------------------------------------------------------
 
-sub convert-notebook(%nb, :target(:$to) is copy = Whatever --> Str) {
+sub convert-notebook(%nb,
+                     :target(:$to) is copy = Whatever,
+                     :$image-directory = Whatever
+        --> Str) {
 
     if $to.isa(Whatever) { $to = 'Markdown' }
     die 'The argument $to is expected to be a string or Whatever.'
@@ -18,7 +21,7 @@ sub convert-notebook(%nb, :target(:$to) is copy = Whatever --> Str) {
 
     my $actions = do given $to.lc {
         when $_ ∈ <raku perl6> { %nb }
-        when $_ eq 'markdown'  { Jupyter::Converter::Markdown.new }
+        when $_ eq 'markdown'  { Jupyter::Converter::Markdown.new(:$image-directory) }
         when $_ eq 'html'      { Jupyter::Converter::HTML.new }
         when $_ ∈ <pod6 pod>   { Jupyter::Converter::POD6.new }
         default {
@@ -34,11 +37,21 @@ sub convert-notebook(%nb, :target(:$to) is copy = Whatever --> Str) {
 # Public API: single exported sub
 #----------------------------------------------------------------------
 
-sub from-jupyter($notebook, :target(:$to) is copy = Whatever --> Str) is export {
+sub from-jupyter($notebook,
+                 :target(:$to) is copy = Whatever,
+                 :$image-directory is copy = Whatever
+        --> Str) is export {
 
     if $notebook.IO.f {
         my $text = slurp($notebook);
         return from-jupyter($text, :$to);
+    }
+
+    if $image-directory.isa(Whatever) { $image-directory = $notebook.IO.dirname ~ '/img'}
+    if $image-directory.IO.e && !$image-directory.IO.d {
+        die "Cannot use '$image-directory' as diretors."
+    } elsif !$image-directory.IO.d {
+        $image-directory.IO.mkdir
     }
     
     if $to.isa(Whatever) { $to = 'Markdown' }

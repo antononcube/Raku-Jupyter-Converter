@@ -7,6 +7,8 @@ use Jupyter::Converter::Actionish;
 class Jupyter::Converter::Markdown
         does Jupyter::Converter::Actionish {
 
+    has $.image-directory is rw = Whatever;
+
     method !render-notebook(%nb --> Str) {
         my @cells = |%nb<cells> // [];
         my $lang  = self!infer-language(%nb);
