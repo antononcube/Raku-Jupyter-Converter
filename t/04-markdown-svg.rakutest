@@ -5,7 +5,7 @@ use Jupyter::Converter;  # exports from-jupyter
 
 plan *;
 
-my @image-dirs = $*TMPDIR ~ '/tmp-img', $*TMPDIR ~ '/tmp-img-2';
+my @image-dirs = $*TMPDIR ~ '/tmp-img', $*TMPDIR ~ '/tmp-img-2', $*TMPDIR ~ '/tmp-img-3';
 
 LEAVE {
     for @image-dirs -> $image-dir {
@@ -120,11 +120,66 @@ subtest {
     my $expected-svg-path = $image_dir.IO.add('cell-1-output-1.svg');
 
     ok $md.contains('```python'), 'Code block emitted';
-    ok $md.contains("![cell 1 output 1 svg]($expected-svg-path)"),
-        'Markdown output references extracted SVG from HTML';
+    ok $md.contains("src=\"$expected-svg-path\""),
+        'HTML output references extracted SVG from HTML';
     ok $expected-svg-path.IO.f, 'SVG file written from HTML payload';
     ok slurp($expected-svg-path).contains('rect width="216" height="216"'),
         'SVG content extracted from HTML payload';
 }, 'Markdown captures SVG outputs embedded in text/html';
+
+#==========================================================
+## 3
+#==========================================================
+
+my $json-html-table = q:to/JSON/;
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": 140,
+      "metadata": {},
+      "source": [
+        "print('html-table')\n"
+      ],
+      "outputs": [
+        {
+          "data": {
+            "text/html": [
+              "<table><tbody><tr><td>",
+              "<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"5\\" height=\\"5\\"><rect width=\\"5\\" height=\\"5\\" fill=\\"red\\"/></svg>",
+              "</td><td>",
+              "<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"6\\" height=\\"6\\"><rect width=\\"6\\" height=\\"6\\" fill=\\"green\\"/></svg>",
+              "</td></tr></tbody></table>"
+            ]
+          },
+          "metadata": {},
+          "output_type": "display_data"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "kernelspec": { "language": "python" }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
+JSON
+;
+
+subtest {
+    my $image_dir = @image-dirs[2];
+    my %args = :to<markdown>;
+    %args{'image-dirname'} = $image_dir;
+
+    my $md = from-jupyter($json-html-table, |%args);
+    my $expected_1 = $image_dir.IO.add('cell-1-output-1.svg');
+    my $expected_2 = $image_dir.IO.add('cell-1-output-1-2.svg');
+
+    ok $md.contains('<table'), 'HTML table is preserved in Markdown output';
+    ok $md.contains("src=\"$expected_1\"") && $md.contains("src=\"$expected_2\""),
+        'Both SVGs replaced with linked images';
+    ok $expected_1.IO.f && $expected_2.IO.f, 'Both SVG files written';
+}, 'Markdown preserves HTML tables with SVG images';
 
 done-testing;
