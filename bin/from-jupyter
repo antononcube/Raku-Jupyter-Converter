@@ -8,9 +8,10 @@ my %*SUB-MAIN-OPTS = :named-anywhere;
 #-----------------------------------------------------------
 
 #| Converts Jupyter notebooks into Markdown, HTML, and Pod6 files.
-sub MAIN(Str $text,                                  #= Input file or Markdown text.
-         Str :t(:format(:$to)) = 'Whatever',         #= Format to convert to. (One of 'html', 'markdown', 'pod6', or 'Whatever'.)
-         Str :o(:$output) = '',                      #= Output file; if an empty string then the result is printed to stdout.
+sub MAIN(Str $text,                                    #= Input file or Markdown text.
+         Str :t(:format(:$to)) = 'Whatever',           #= Format to convert to. (One of 'html', 'markdown', 'pod6', or 'Whatever'.)
+         Str :img-dir(:$image-directory) = 'Whatever', #= Directory to export images to.
+         Str :o(:$output) = '',                        #= Output file; if an empty string then the result is printed to stdout.
          ) {
 
     my $toSpec = $to;
@@ -29,7 +30,7 @@ sub MAIN(Str $text,                                  #= Input file or Markdown t
         }
     }
 
-    my $res = from-jupyter($text, target => $toSpec);
+    my $res = from-jupyter($text, target => $toSpec, :$image-directory);
 
     if $output.chars > 0 {
         spurt($output, $res);
