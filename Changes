@@ -3,6 +3,7 @@ Changes of the Raku package "Jupyter::Converter".
 2025-12-30 0.0.3
     - Added --image-directory option to CLI.
     - Conversion to Org-mode files and Wolfram notebooks (aka Mathematica notebooks) via "Markdown::Grammar".
+    - Using a method option for the conversion to HTML of Pod6 files.
 
 2025-12-30 0.0.2
     - Implemented the Markdown converter to export SVG images into a directory.
