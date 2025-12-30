@@ -17,10 +17,10 @@ sub MAIN(Str $text,                                    #= Input file or Markdown
     my $toSpec = $to;
     if !$to || $to.lc ∈ <whatever automatic> {
         $toSpec = do given $output {
-            #when $_ ~~ / '.nb' /  { 'mathematica' }
+            when $_ ~~ / '.nb' /   { 'mathematica' }
             when $_ ~~ / '.md' /   { 'markdown' }
             when $_ ~~ / '.html' / { 'html' }
-            #when $_ ~~ / '.org' / { 'org' }
+            when $_ ~~ / '.org' /  { 'org' }
             when $_ ~~ / '.pod' | '.pod6' / { 'pod6' }
             when $_ ~~ / '.raku' | '.p6' /  { 'raku' }
             default {
