@@ -84,6 +84,14 @@ The CLI script `from-jupyter` takes both file names and (Markdown) text. Here is
 **Remark:** If CLI script's argument `--output` is a non-empty string and `--to` is "whatever" or "automatic",
 then an attempt is made to conclude the format to convert to from the extension of the file name given to `--output`.
 
+The CLI (and `from-jupyter`) take a method option, which, if set to "delegation" converts the Jupyter notebook 
+to Markdown text and then uses `from-markdown` of "Markdown::Grammar", [AAp1].
+
+More elaborated conversions can be done with shell pipelines. For example:
+
+```
+from-jupyter resources/demo.ipynb --to=markdown | from-markdown -r=RakuInputExecute | pbcopy
+```
 
 ------
 
@@ -97,6 +105,8 @@ The most important items are placed first.
   - [X] DONE Simple delegation for Mathematica and Org-mode 
   - [X] DONE Have a method option in `from-jupyter`
   - [X] DONE Corresponding CLI changes
+  - I am not sure how needed this functionality is, after I made `from-markdown` being able to take pipeline input.
+    - See "Markdown::Grammar:ver<0.6.4>:auth<zef:antononcube>:api<1>"
 - [ ] TODO Compare package's HTML and POD6 converters outputs to those of "Markdown::Grammar"
 
 ------
