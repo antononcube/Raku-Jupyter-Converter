@@ -49,7 +49,7 @@ sub from-jupyter($notebook,
 
     if $image-directory.isa(Whatever) { $image-directory = $notebook.IO.dirname ~ '/img'}
     if $image-directory.IO.e && !$image-directory.IO.d {
-        die "Cannot use '$image-directory' as diretors."
+        die "Cannot use '$image-directory' as directory."
     } elsif !$image-directory.IO.d {
         $image-directory.IO.mkdir
     }
