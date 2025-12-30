@@ -69,11 +69,12 @@ from-jupyter --help
 ```
 ```
 # Usage:
-#   from-jupyter <text> [-t|--format|--to=<Str>] [--img-dir|--image-directory=<Str>] [-o|--output=<Str>] -- Converts Jupyter notebooks into Markdown, HTML, and Pod6 files.
+#   from-jupyter <text> [-t|--format|--to=<Str>] [--img-dir|--image-directory=<Str>] [-m|--method=<Str>] [-o|--output=<Str>] -- Converts Jupyter notebooks into Markdown, HTML, and Pod6 files.
 #   
 #     <text>                               Input file or Markdown text.
 #     -t|--format|--to=<Str>               Format to convert to. (One of 'html', 'markdown', 'pod6', or 'Whatever'.) [default: 'Whatever']
 #     --img-dir|--image-directory=<Str>    Directory to export images to. [default: 'Whatever']
+#     -m|--method=<Str>                    Method of conversion. (One of 'delegation' or 'Whatever'.) [default: 'Whatever']
 #     -o|--output=<Str>                    Output file; if an empty string then the result is printed to stdout. [default: '']
 ```
 
@@ -92,9 +93,10 @@ The most important items are placed first.
 
 - [X] DONE Markdown: export SVG images into an image directory
   - And use the links to those images in the Markdown output.
-- [ ] TODO Delegate to "Grammar::Markdown" for conversion
-  - [ ] TODO Have a method option in `from-jupyter`
-  - [ ] TODO Corresponding CLI changes
+- [X] DONE Delegate to "Grammar::Markdown" for conversion  
+  - [X] DONE Simple delegation for Mathematica and Org-mode 
+  - [X] DONE Have a method option in `from-jupyter`
+  - [X] DONE Corresponding CLI changes
 - [ ] TODO Compare package's HTML and POD6 converters outputs to those of "Markdown::Grammar"
 
 ------

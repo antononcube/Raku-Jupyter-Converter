@@ -83,9 +83,10 @@ The most important items are placed first.
 
 - [X] DONE Markdown: export SVG images into an image directory
   - And use the links to those images in the Markdown output.
-- [ ] TODO Delegate to "Grammar::Markdown" for conversion
-  - [ ] TODO Have a method option in `from-jupyter`
-  - [ ] TODO Corresponding CLI changes
+- [X] DONE Delegate to "Grammar::Markdown" for conversion  
+  - [X] DONE Simple delegation for Mathematica and Org-mode 
+  - [X] DONE Have a method option in `from-jupyter`
+  - [X] DONE Corresponding CLI changes
 - [ ] TODO Compare package's HTML and POD6 converters outputs to those of "Markdown::Grammar"
 
 ------
