@@ -56,18 +56,26 @@ class Jupyter::Converter::Markdown
         my @chunks;
 
         for @outputs.kv -> $output-idx, %output {
+            if %output<text> -> $raw-text {
+                @chunks.push("```\n{( '# ' <<~<< $raw-text).join}\n```");
+            }
+
             my $data = %output<data> // next;
 
-            if $data{'text/html'} -> $raw-html {
+            if $data<text/html> -> $raw-html {
                 my $html = self!render-html-output($raw-html, :cell-idx($idx), :$output-idx);
                 @chunks.push($html) if $html.chars;
             }
 
-            if $data{'image/svg+xml'} -> $raw-svg {
+            if $data<image/svg+xml> -> $raw-svg {
                 my $svg = self!normalize-svg($raw-svg) // next;
 
                 my $path = self!write-svg($svg, :cell-idx($idx), :$output-idx);
                 @chunks.push("![cell {$idx + 1} output {$output-idx + 1} svg]($path)");
+            }
+
+            if ($data<text/plain> // $data<text>) -> $raw-text {
+                @chunks.push("```\n{( '# ' X~ $raw-text).join}\n```");
             }
         }
 
