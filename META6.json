@@ -1,6 +1,6 @@
 {
     "name": "Jupyter::Converter",
-    "description": "Converters of Jupyter notebooks into different formats (HTML, Markdown, Pod6.)",
+    "description": "Converters of Jupyter notebooks into different formats (HTML, Markdown, Mathematica, Org-mode, Pod6.)",
     "version": "0.1.0",
     "raku": "6.d",
     "authors": [
@@ -24,10 +24,12 @@
     ],
     "license": "Artistic-2.0",
     "tags": [
-        "jupyter",
         "converter",
-        "markdown",
         "html",
+        "jupyter",
+        "markdown",
+        "mathematica",
+        "org-mode",
         "pod6"
     ],
     "api": "1",
