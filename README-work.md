@@ -120,7 +120,7 @@ The most important items are placed first.
 
 ### Packages
 
-[AAp1] Anton Antonov
+[AAp1] Anton Antonov,
 [Markdown::Grammar, Raku package](https://github.com/antononcube/Raku-Markdown-Grammar),
 (2022-2025),
 [GitHub/antononcube](https://github.com/antononcube).
