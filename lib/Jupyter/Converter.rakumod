@@ -14,7 +14,8 @@ sub convert-notebook(%nb,
                      :target(:$to) is copy = Whatever,
                      :$image-dirname = Whatever,
                      :$notebook-dirname = Whatever,
-                     :$method = Whatever
+                     :$method = Whatever,
+                     :%delegation-args = %()
         --> Str) {
 
     if $to.isa(Whatever) { $to = 'Markdown' }
@@ -32,7 +33,7 @@ sub convert-notebook(%nb,
 
         when $_ eq 'html' && $delegate {
             my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
-            from-markdown($md, to => 'html')
+            from-markdown($md, to => 'html', |%delegation-args)
         }
 
         when $_ eq 'html' {
@@ -41,7 +42,7 @@ sub convert-notebook(%nb,
 
         when $_ ∈ <pod6 pod> && $delegate {
             my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
-            return from-markdown($md, to => 'pod6')
+            return from-markdown($md, to => 'pod6', |%delegation-args)
         }
         when $_ ∈ <pod6 pod> {
             Jupyter::Converter::POD6.new.render-notebook(%nb)
@@ -49,12 +50,12 @@ sub convert-notebook(%nb,
 
         when $_ ∈ <org org-mode> {
             my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
-            return from-markdown($md, to => 'org-mode')
+            return from-markdown($md, to => 'org-mode', |%delegation-args)
         }
 
         when $_ ∈ <wolfram wl mathematica> {
             my $md = from-jupyter(%nb, to => 'markdown', :$image-dirname, :$notebook-dirname);
-            return from-markdown($md, to => 'mathematica')
+            return from-markdown($md, to => 'mathematica', |%delegation-args)
         }
 
         default {
@@ -72,14 +73,15 @@ sub from-jupyter($notebook,
                  :target(:$to) is copy = Whatever,
                  :image-directory(:$image-dirname) is copy = Whatever,
                  :notebook-directory(:$notebook-dirname) is copy = Whatever,
-                 :$method = Whatever
+                 :$method = Whatever,
+                 :%delegation-args = %()
         --> Str) is export {
 
     if $notebook ~~ Str:D && $notebook.IO.f {
         if $image-dirname.isa(Whatever) { $image-dirname = $notebook.IO.dirname.Str ~ '/img' }
         $notebook-dirname = $notebook.IO.dirname.Str;
         my $text = slurp($notebook);
-        return from-jupyter($text, :$to, :$image-dirname, :$notebook-dirname, :$method);
+        return from-jupyter($text, :$to, :$image-dirname, :$notebook-dirname, :$method, :%delegation-args);
     }
 
     if $image-dirname.isa(Whatever) { $image-dirname = $*CWD ~ '/img' }
@@ -115,5 +117,5 @@ sub from-jupyter($notebook,
         }
     }
 
-    return convert-notebook($nb, :$to, :$image-dirname, :$notebook-dirname, :$method);
+    return convert-notebook($nb, :$to, :$image-dirname, :$notebook-dirname, :$method, :%delegation-args);
 }
